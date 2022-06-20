@@ -8,10 +8,14 @@ With some minor updates.
 
 Language en_US mandatory for sysop. Check it with
 
+   <pre>
    env | grep LC_ALL
    env | grep LANG
+   </pre>
 
 It must be 
 
+   <pre>
    LANG=en_US.UTF-8
    LC_ALL=en_US.UTF-8
+   </pre>
