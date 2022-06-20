@@ -9,7 +9,7 @@ ADMIN="my_email@email.com"
 ALERT=90
 # Exclude list of unwanted monitoring, if several partions then use "|" to separate the partitions.
 # An example: EXCLUDE_LIST="/dev/hdd1|/dev/hdc5"
-EXCLUDE_LIST="/auto/ripper"
+EXCLUDE_LIST="/auto/ripper|/snap"
 #
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #
