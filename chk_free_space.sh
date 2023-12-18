@@ -19,14 +19,18 @@ do
   usep=$(echo $output | awk '{ print $1}' | cut -d'%' -f1)
   partition=$(echo $output | awk '{print $2}')
   if [ $usep -ge $ALERT ] ; then
-     echo "Running out of space \"$partition ($usep%)\" on server $(hostname), $(date)" | \
-     mail -s "Alert: Almost out of disk space $usep%" $ADMIN
+    echo "Running out of space \"$partition ($usep%)\" on server $(hostname), $(date)" | \
+      mail -s "Alert: Almost out of $1 $usep%" $ADMIN
   fi
 done
 }
 
+_excluded="^Filesystem|tmpfs|cdrom"
 if [ "$EXCLUDE_LIST" != "" ] ; then
-  df -H | grep -vE "^Filesystem|tmpfs|cdrom|${EXCLUDE_LIST}" | awk '{print $5 " " $6}' | main_prog
-else
-  df -H | grep -vE "^Filesystem|tmpfs|cdrom" | awk '{print $5 " " $6}' | main_prog
+  _excluded="${_excluded}|${EXCLUDE_LIST}"
 fi
+
+# disk usage
+df -H | grep -vE "${_excluded}" | awk '{print $5 " " $6}' | main_prog "disk space"
+# inode usage
+df -iH | grep -vE "${_excluded}" | awk '{print $5 " " $6}' | main_prog "inodes"
