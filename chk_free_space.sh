@@ -1,14 +1,17 @@
 #!/bin/bash
-# Shell script to monitor disk space
-# It will send an email to $ADMIN if the usage percentage is >= ALERT.
+# Shell script para monitorear el uso de disco.
+# Envía un correo a $ADMIN si el porcentaje de uso es >= $ALERT.
 
-ADMIN="my_email@email.com"
+ADMIN="coviedo@tallerdigital.cl"
 ALERT=90
+
+# Excluir filesystems o puntos de montaje que no quieras monitorear
+# (usa | para separar varios)
 EXCLUDE_LIST="/auto/ripper|/snap"
 
-function main_prog() {
-  while read usep partition; do
-    # Quitar el símbolo % si viene con él
+main_prog() {
+  while read -r usep partition; do
+    # Quitar el símbolo %
     usep=${usep%\%}
 
     # Saltar líneas que no tengan número
@@ -17,16 +20,20 @@ function main_prog() {
     fi
 
     if [ "$usep" -ge "$ALERT" ]; then
-      echo "Running out of space \"$partition ($usep%)\" on server $(hostname), $(date)" | \
-        mail -s "Alert: Almost out of disk space on $(hostname): $partition $usep%" "$ADMIN"
+      mensaje="Running out of space \"$partition ($usep%)\" on server $(hostname), $(date)"
+      echo "$mensaje" | mail -s "Alert: Almost out of disk space on $(hostname): $partition $usep%" "$ADMIN"
     fi
   done
 }
 
+# Patrones a excluir en la salida de df (a nivel de línea completa)
 _excluded="^Filesystem|tmpfs|cdrom"
 if [ -n "$EXCLUDE_LIST" ]; then
   _excluded="${_excluded}|${EXCLUDE_LIST}"
 fi
 
-# Obtener uso de disco y pasarlo a la función
-df -P -h | awk 'NR>1 {print $5 " " $6}' | egrep -v "$_excluded" | main_prog
+# Obtener uso de disco, excluir lo no deseado y procesar
+df -P -h \
+  | egrep -v "$_excluded" \
+  | awk '{print $5 " " $6}' \
+  | main_prog
